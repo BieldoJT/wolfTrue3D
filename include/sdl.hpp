@@ -14,6 +14,7 @@ class SDLConfig
 		SDL_Window *window;
 		SDL_Renderer* renderer;
 		SDL_Texture* texture;
+		SDL_GLContext glContext;
 
 	public:
 	//construtor e destrutor

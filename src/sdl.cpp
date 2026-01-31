@@ -1,35 +1,57 @@
 #include "include/sdl.hpp"
 #include "include/defines.h"
+#include <include/glad/glad.h>
 
 
 SDLConfig::SDLConfig()
 {
-	int a = SDL_Init(SDL_INIT_VIDEO);
-	if (a)
+	//iniciando o SDL
+	int init = SDL_Init(SDL_INIT_VIDEO);
+	if (init)
 	{
 		printf("SDL não pôde ser inicializado! SDL_Error: %s\n", SDL_GetError());
-		//FAZER A EXPECTIOON DE ERRO
+		throw ErroNoSDL();
 	}
-	this->window = SDL_CreateWindow("Hello SDL2", 0, 0, WEIGHT, HEIGHT, SDL_WINDOW_SHOWN);
+
+	// Pedindo o contexto ao OpenGL 3.3 Core
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+	// criando a janela com a flag SDL_WINDOW_OPENGL, para permitir usar openGL
+	this->window = SDL_CreateWindow("Hello SDL2",
+		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED,
+		WEIGHT,
+		HEIGHT,
+		SDL_WINDOW_OPENGL); // essa flag que permite usar o OpenGl
 	if (!window) {
 		printf("Janela não pôde ser criada! SDL_Error: %s\n", SDL_GetError());
 		SDL_Quit();
-		//FAZER A EXPECTIOON DE ERRO
+		throw ErroNoSDL();
 	}
-	this->renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	this->texture = SDL_CreateTexture(
-		renderer,
-		SDL_PIXELFORMAT_ARGB8888,
-		SDL_TEXTUREACCESS_STREAMING,
-		WEIGHT, HEIGHT
-	);
+	//Criando contexto OpenGL
+	SDL_GLContext glContext = SDL_GL_CreateContext(window);
+
+	//Carregar funções OpenGL (GLAD)
+	if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) //essa função carrega as funções do OpenGl
+	{
+		printf("Erro ao inicializar o GLAD! SDL_Error: %s\n", SDL_GetError());
+		SDL_GL_DeleteContext(glContext);
+		SDL_DestroyWindow(this->window);
+		throw ErroNoSDL();
+	}
+
+	printf("OpenGL: %s\n", glGetString(GL_VERSION));
+
 }
 
 SDLConfig::~SDLConfig(void)
 {
-	SDL_DestroyTexture(this->texture);
-	SDL_DestroyRenderer(this->renderer);
+	//SDL_DestroyTexture(this->texture);
+	//SDL_DestroyRenderer(this->renderer);
+	SDL_GL_DeleteContext(glContext);
 	SDL_DestroyWindow(this->window);
 	SDL_Quit();
 	//fazer algo pra terminar
@@ -95,6 +117,14 @@ void SDLConfig::render()
 				//outros cases aqui
 			}
 		}
+		//Limpa a tela comuma cor(AQUI JA USA GPU)
+		glClearColor(0,0,255,1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		//Troca buffers (mostra na tela)
+		SDL_GL_SwapWindow(this->window);
+
+		/*
 		void* pixels;
 		int pitch;
 		SDL_LockTexture(texture, nullptr, &pixels, &pitch);
@@ -115,5 +145,6 @@ void SDLConfig::render()
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, nullptr, nullptr);
 		SDL_RenderPresent(renderer);
+		*/
 	}
 }
