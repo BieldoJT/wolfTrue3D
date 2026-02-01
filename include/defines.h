@@ -2,6 +2,6 @@
 # define DEFINES_H
 
 # define HEIGHT 480
-# define WEIGHT 640
+# define WIDGHT 640
 
 #endif
