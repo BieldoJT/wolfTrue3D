@@ -5,7 +5,7 @@ INCLUDES = -Iinclude -I.
 LIBS = -lSDL2 -ldl
 
 SRC_DIR = src
-SRC_FILES = main.cpp sdl.cpp glad.c shader.cpp
+SRC_FILES = main.cpp sdl.cpp glad.c shader.cpp stb_image.cpp
 SRC = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 
 all: $(NAME)
