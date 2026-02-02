@@ -135,21 +135,24 @@ void SDLConfig::render()
 
 	unsigned int texture;
 	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	// CONFIGURAÇÔES DE TEXTURA
-	// paremetros de wrapping
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	/// paremetros de wrapping
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	// paremetros de filtro
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
 	//carregar e gerar a textura
 	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load("images/CRVascodaGama png.png", &width, &height, &nrChannels,0);
 	if(data)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
@@ -202,6 +205,10 @@ void SDLConfig::render()
 
 		// ativando o shader
 		shader.use();
+
+		//
+		//glUniform1i(glGetUniformLocation(shader.Id, "uma textura"), 0); setada manualmente
+		//shader.setInt("outra textura",1);
 
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 		//glDrawArrays(GL_TRIANGLES, 0, 6);
