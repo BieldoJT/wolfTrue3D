@@ -3,6 +3,9 @@
 #include <include/glad/glad.h>
 #include "include/shader.hpp"
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 SDLConfig::SDLConfig()
@@ -209,6 +212,14 @@ void SDLConfig::render()
 		//
 		//glUniform1i(glGetUniformLocation(shader.Id, "uma textura"), 0); setada manualmente
 		//shader.setInt("outra textura",1);
+		double time = (double)SDL_GetPerformanceCounter() / (double)SDL_GetPerformanceFrequency();
+
+		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		trans = glm::rotate(trans, (float)time, glm::vec3(0.0f, 0.0f, 1.f));
+
+		unsigned int transformLoc = glGetUniformLocation(shader.Id, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 		//glDrawArrays(GL_TRIANGLES, 0, 6);
