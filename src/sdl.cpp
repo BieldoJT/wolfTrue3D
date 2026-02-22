@@ -272,15 +272,21 @@ glm::vec3 cubePositions[] = {
 		//shader.setInt("outra textura",1);
 		double time = (double)SDL_GetPerformanceCounter() / (double)SDL_GetPerformanceFrequency();
 
+		// cena = Model + View + Projeção
+		// projeção = perspectiva
+
+		// model define a posição geral dos objetos no mundo. Ex.: aqui se define onde fica o chão
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, (float)time * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
+		// view tem relação com a camera sobre onde ela esta no mundo( não define para onde olha, apenas sobre onde está)
 		glm::mat4 view = glm::mat4(1.0f);
 		// note that we're translating the scene in the reverse direction of where we want to move
 		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
+		// define sobre como se olha o mundo ao redor e escalas de distancia e angulo
 		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		glm::mat4 trans = glm::mat4(1.0f);
 		//trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
@@ -309,12 +315,6 @@ glm::vec3 cubePositions[] = {
 			shader.setMat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
-
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		//glDrawArrays(GL_TRIANGLES,0,3);
-        // glBindVertexArray(0); // no need to unbind it every time
-
 
 		//Troca buffers (mostra na tela)
 		SDL_GL_SwapWindow(this->window);
