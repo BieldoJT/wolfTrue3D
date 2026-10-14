@@ -25,11 +25,21 @@ void RenderSystem::draw(Scene& scene, Window& window, Shader& shader, TextureCat
 
 	Camera& camera = cameraEntity->camera;
 	glm::vec3 position = cameraEntity->transform.position;
+	float yawRad = glm::radians(camera.yaw);
+	float pitchRad = glm::radians(camera.pitch);
 	glm::vec3 front(
-		cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch)),
-		sin(glm::radians(camera.pitch)),
-		sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch)));
+		cos(yawRad) * cos(pitchRad),
+		sin(pitchRad),
+		sin(yawRad) * cos(pitchRad));
 	front = glm::normalize(front);
+	glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
+	glm::vec3 up = worldUp;
+	glm::vec3 side = glm::cross(front, worldUp);
+	if (glm::dot(side, side) <= 1.0e-8f)
+	{
+		float sign = front.y >= 0.0f ? 1.0f : -1.0f;
+		up = glm::vec3(cos(yawRad) * sign, 0.0f, sin(yawRad) * sign);
+	}
 
 	int w = window.width();
 	int h = window.height();
@@ -37,7 +47,7 @@ void RenderSystem::draw(Scene& scene, Window& window, Shader& shader, TextureCat
 		h = 1;
 	float aspect = static_cast<float>(w) / static_cast<float>(h);
 
-	glm::mat4 view = glm::lookAt(position, position + front, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 view = glm::lookAt(position, position + front, up);
 	glm::mat4 projection = glm::perspective(glm::radians(camera.fovDegrees), aspect, 0.1f, 100.0f);
 
 	shader.use();
