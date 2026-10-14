@@ -77,7 +77,7 @@ install_apt() {
 	fi
 	export DEBIAN_FRONTEND=noninteractive
 	run_root apt-get update
-	run_root apt-get install -y build-essential libsdl2-dev libgl1-mesa-dev
+	run_root apt-get install -y build-essential pkg-config libsdl2-dev libgl1-mesa-dev
 }
 
 install_dnf() {
@@ -90,8 +90,8 @@ install_dnf() {
 		echo "Distro identificada como Fedora/RHEL, mas dnf e yum não estão no PATH." >&2
 		exit 1
 	fi
-	if ! run_root "${installer}" install -y gcc-c++ make SDL2-devel libglvnd-devel; then
-		run_root "${installer}" install -y gcc-c++ make SDL2-devel mesa-libGL-devel
+	if ! run_root "${installer}" install -y gcc-c++ make pkgconf-pkg-config SDL2-devel libglvnd-devel; then
+		run_root "${installer}" install -y gcc-c++ make pkgconfig SDL2-devel mesa-libGL-devel
 	fi
 }
 
@@ -100,10 +100,10 @@ install_pacman() {
 		echo "Distro identificada como Arch, mas pacman não está no PATH." >&2
 		exit 1
 	fi
-	run_root pacman -Sy --needed --noconfirm base-devel sdl2 mesa
+	run_root pacman -Sy --needed --noconfirm base-devel pkgconf sdl2 mesa
 }
 
-echo "Sem virtualenv. Pacotes de sistema: compilador C++, Make, SDL2 e OpenGL."
+echo "Sem virtualenv. Pacotes de sistema: compilador C++, Make, pkg-config, SDL2 e OpenGL."
 echo "GLM já está vendido em third_party/glm."
 
 case "$(family)" in
@@ -126,8 +126,8 @@ esac
 
 CHECK="$(mktemp)"
 trap 'rm -f "${CHECK}"' EXIT
-if ! c++ -std=c++14 -I"${ROOT}/third_party/glm" -x c++ - -o "${CHECK}" -lSDL2 -ldl <<'EOF'
-#include <SDL2/SDL.h>
+if ! c++ -std=c++14 -I"${ROOT}/third_party/glm" $(pkg-config --cflags sdl2) -x c++ - -o "${CHECK}" $(pkg-config --libs sdl2) $(pkg-config --libs gl) -ldl <<'EOF'
+#include <SDL.h>
 #include <glm/glm.hpp>
 int main()
 {

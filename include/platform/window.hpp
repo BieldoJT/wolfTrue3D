@@ -1,7 +1,7 @@
 #ifndef PLATFORM_WINDOW_HPP
 # define PLATFORM_WINDOW_HPP
 
-# include <SDL2/SDL.h>
+# include <SDL.h>
 
 class Window
 {
