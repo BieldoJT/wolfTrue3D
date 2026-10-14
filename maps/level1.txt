@@ -1,0 +1,13 @@
+// level1
+// # parede    . ou espaço vazio    P spawn do jogador
+// wall <id> escolhe a textura no catálogo data/textures.txt
+wall 1
+############
+#..........#
+#..........#
+#....##....#
+#....##....#
+#..........#
+#..P.......#
+#..........#
+############
