@@ -17,6 +17,7 @@ class Window
 		void swap();
 		int width() const;
 		int height() const;
+		SDL_Window* sdlWindow() const;
 };
 
 #endif

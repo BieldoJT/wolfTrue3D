@@ -10,6 +10,9 @@ Window::Window()
 	  glContext(0),
 	  sdlReady(false)
 {
+	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
+	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "1");
+
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
 		std::cerr << "SDL não pôde ser inicializado! SDL_Error: " << SDL_GetError() << std::endl;
@@ -97,4 +100,9 @@ int Window::height() const
 	if (this->window)
 		SDL_GetWindowSize(this->window, &w, &h);
 	return h;
+}
+
+SDL_Window* Window::sdlWindow() const
+{
+	return this->window;
 }
