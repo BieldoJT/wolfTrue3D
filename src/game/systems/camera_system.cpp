@@ -18,19 +18,22 @@ void CameraSystem::update(Scene& scene, const Input& input, float dt)
 	Camera& camera = entity->camera;
 	Transform& transform = entity->transform;
 
-	if (this->ignoreFirstMouse)
+	if (input.mouseCaptured)
 	{
-		if (input.mouseDeltaX != 0.0f || input.mouseDeltaY != 0.0f)
-			this->ignoreFirstMouse = false;
-	}
-	else
-	{
-		camera.yaw += input.mouseDeltaX * camera.mouseSensitivity;
-		camera.pitch -= input.mouseDeltaY * camera.mouseSensitivity;
-		if (camera.pitch > 89.0f)
-			camera.pitch = 89.0f;
-		if (camera.pitch < -89.0f)
-			camera.pitch = -89.0f;
+		if (this->ignoreFirstMouse)
+		{
+			if (input.mouseDeltaX != 0.0f || input.mouseDeltaY != 0.0f)
+				this->ignoreFirstMouse = false;
+		}
+		else
+		{
+			camera.yaw += input.mouseDeltaX * camera.mouseSensitivity;
+			camera.pitch -= input.mouseDeltaY * camera.mouseSensitivity;
+			if (camera.pitch > 90.0f)
+				camera.pitch = 90.0f;
+			if (camera.pitch < -90.0f)
+				camera.pitch = -90.0f;
+		}
 	}
 
 	glm::vec3 forward(

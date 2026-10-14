@@ -11,6 +11,7 @@ class Input
 		bool moveRight;
 		float mouseDeltaX;
 		float mouseDeltaY;
+		bool mouseCaptured;
 
 		Input();
 
