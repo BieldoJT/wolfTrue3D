@@ -2,6 +2,7 @@
 # define GAME_SCENE_HPP
 
 # include "game/entity.hpp"
+# include "game/map_grid.hpp"
 # include "render/mesh.hpp"
 
 # include <cstddef>
@@ -12,6 +13,7 @@ class Scene
 	private:
 		Mesh cube;
 		std::vector<Entity> entities;
+		MapGrid mapGrid;
 
 	public:
 		Scene();
@@ -20,6 +22,7 @@ class Scene
 		Entity& addEntity();
 		std::vector<Entity>& getEntities();
 		Mesh& cubeMesh();
+		MapGrid& grid();
 		Entity* cameraEntity();
 };
 

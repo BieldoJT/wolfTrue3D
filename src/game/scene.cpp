@@ -26,6 +26,11 @@ Mesh& Scene::cubeMesh()
 	return this->cube;
 }
 
+MapGrid& Scene::grid()
+{
+	return this->mapGrid;
+}
+
 Entity* Scene::cameraEntity()
 {
 	for (std::size_t i = 0; i < this->entities.size(); ++i)
