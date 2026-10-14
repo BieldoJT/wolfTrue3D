@@ -14,6 +14,7 @@ namespace
 App::App()
 	: shader("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl")
 {
+	this->input.attachWindow(this->window.sdlWindow());
 	this->input.captureMouse(true);
 	if (!this->textures.load(TEXTURE_CATALOG))
 		throw std::runtime_error("Não foi possível carregar o catálogo de texturas");
