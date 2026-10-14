@@ -1,6 +1,6 @@
 #include "platform/input.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 Input::Input()
 	: quit(false),
