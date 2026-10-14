@@ -13,6 +13,7 @@ SRC_FILES = main.cpp glad.c stb_image.cpp \
 	render/mesh.cpp \
 	render/texture.cpp \
 	game/scene.cpp \
+	game/map_grid.cpp \
 	game/systems/camera_system.cpp \
 	game/systems/map_build_system.cpp \
 	game/systems/render_system.cpp \

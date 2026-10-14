@@ -40,13 +40,29 @@ void CameraSystem::update(Scene& scene, const Input& input, float dt)
 	forward = glm::normalize(forward);
 	glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
 
+	glm::vec3 delta(0.0f);
 	float distance = camera.moveSpeed * dt;
 	if (input.moveForward)
-		transform.position += forward * distance;
+		delta += forward * distance;
 	if (input.moveBack)
-		transform.position -= forward * distance;
+		delta -= forward * distance;
 	if (input.moveRight)
-		transform.position += right * distance;
+		delta += right * distance;
 	if (input.moveLeft)
-		transform.position -= right * distance;
+		delta -= right * distance;
+
+	if (!entity->hasCollider)
+	{
+		transform.position += delta;
+		return;
+	}
+
+	float radius = entity->collider.radius;
+	MapGrid& grid = scene.grid();
+	float nextX = transform.position.x + delta.x;
+	if (!grid.overlapsWall(nextX, transform.position.z, radius))
+		transform.position.x = nextX;
+	float nextZ = transform.position.z + delta.z;
+	if (!grid.overlapsWall(transform.position.x, nextZ, radius))
+		transform.position.z = nextZ;
 }

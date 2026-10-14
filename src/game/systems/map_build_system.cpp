@@ -86,6 +86,9 @@ bool MapBuildSystem::build(Scene& scene, const std::string& mapPath)
 		std::cerr << "Mapa sem grade: " << mapPath << std::endl;
 		return false;
 	}
+
+	scene.grid().cellSize = CELL;
+	scene.grid().rows = rows;
 	if (!sawWallDirective)
 		std::cout << "Mapa sem linha 'wall <id>'; usando textura " << wallTextureId << std::endl;
 
@@ -141,5 +144,6 @@ bool MapBuildSystem::build(Scene& scene, const std::string& mapPath)
 	player.hasTransform = true;
 	player.transform.position = glm::vec3(spawnX, 0.0f, spawnZ);
 	player.hasCamera = true;
+	player.hasCollider = true;
 	return true;
 }
