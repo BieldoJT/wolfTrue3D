@@ -2,7 +2,8 @@ NAME = wolf
 
 COMPILER = c++
 CXXFLAGS = -std=c++14
-INCLUDES = -Iinclude -I.
+# GLM é header vendido. SDL2 e OpenGL ficam no sistema (make deps).
+INCLUDES = -Iinclude -I. -Ithird_party/glm
 LIBS = -lSDL2 -ldl
 
 SRC_DIR = src
@@ -19,7 +20,12 @@ SRC_FILES = main.cpp glad.c stb_image.cpp \
 	app/app.cpp
 SRC = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 
+.PHONY: all clean re deps
+
 all: $(NAME)
+
+deps:
+	bash scripts/setup-deps.sh
 
 $(NAME): $(SRC)
 	$(COMPILER) $(CXXFLAGS) $(INCLUDES) $(SRC) $(LIBS) -o $(NAME)
