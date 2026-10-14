@@ -31,8 +31,8 @@ void Input::poll()
 			this->quit = true;
 		else if (event.type == SDL_MOUSEMOTION)
 		{
-			this->mouseDeltaX += static_cast<float>(event.motion.xrel);
-			this->mouseDeltaY += static_cast<float>(event.motion.yrel);
+			this->mouseDeltaX -= static_cast<float>(event.motion.xrel);
+			this->mouseDeltaY -= static_cast<float>(event.motion.yrel);
 		}
 	}
 
