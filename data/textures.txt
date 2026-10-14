@@ -1,0 +1,4 @@
+// id caminho
+// Para acrescentar uma textura: coloque o arquivo e uma linha nova.
+// O mapa referencia o id (linha wall), não o caminho.
+1 images/CRVascodaGama png.png

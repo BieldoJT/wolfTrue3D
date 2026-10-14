@@ -1,4 +1,4 @@
-#include "include/shader.hpp"
+#include "render/shader.hpp"
 //contrutor, recebe o caminho do codigo vertex e fragment e linka
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
