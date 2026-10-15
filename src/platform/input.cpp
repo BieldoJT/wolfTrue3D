@@ -12,9 +12,6 @@ namespace
 
 Input::Input()
 	: window(0),
-	  ignoreWarp(false),
-	  ignoreWarpX(0),
-	  ignoreWarpY(0),
 	  quit(false),
 	  moveForward(false),
 	  moveBack(false),
@@ -22,7 +19,12 @@ Input::Input()
 	  moveRight(false),
 	  mouseDeltaX(0.0f),
 	  mouseDeltaY(0.0f),
-	  mouseCaptured(false)
+	  mouseCaptured(false),
+	  mouseX(0),
+	  mouseY(0),
+	  mouseDown(false),
+	  menuLeft(false),
+	  menuRight(false)
 {}
 
 void Input::attachWindow(SDL_Window* window)
@@ -30,73 +32,26 @@ void Input::attachWindow(SDL_Window* window)
 	this->window = window;
 }
 
+// Modo relativo nativo do SDL: o cursor fica preso e escondido e o mouse
+// entrega deltas ilimitados, sem depender da borda da janela.
 void Input::applyRelativeMode()
 {
-	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
-	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "1");
-	SDL_ShowCursor(SDL_DISABLE);
-	if (this->window)
-		SDL_SetWindowGrab(this->window, SDL_TRUE);
-	if (SDL_GetRelativeMouseMode() == SDL_TRUE)
-		SDL_SetRelativeMouseMode(SDL_FALSE);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-}
-
-void Input::centerCursor(bool discardMotion)
-{
-	if (!this->window)
-		return;
-
-	int w = 0;
-	int h = 0;
-	SDL_GetWindowSize(this->window, &w, &h);
-	if (w < 1 || h < 1)
-		return;
-
-	int cx = w / 2;
-	int cy = h / 2;
-	int mx = cx;
-	int my = cy;
-	SDL_GetMouseState(&mx, &my);
-	this->ignoreWarp = true;
-	this->ignoreWarpX = cx - mx;
-	this->ignoreWarpY = cy - my;
-	SDL_WarpMouseInWindow(this->window, cx, cy);
-	SDL_PumpEvents();
-	if (discardMotion)
-	{
-		SDL_FlushEvent(SDL_MOUSEMOTION);
-		return;
-	}
-
-	SDL_Event queued[32];
-	int count = SDL_PeepEvents(queued, 32, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION);
-	if (count < 0)
-		count = 0;
-	for (int i = 0; i < count; ++i)
-	{
-		if (queued[i].motion.xrel == this->ignoreWarpX
-			&& queued[i].motion.yrel == this->ignoreWarpY)
-			continue;
-		SDL_PushEvent(&queued[i]);
-	}
+	SDL_GetRelativeMouseState(0, 0);
 }
 
 void Input::captureMouse(bool capture)
 {
 	this->mouseCaptured = capture;
+	this->mouseDeltaX = 0.0f;
+	this->mouseDeltaY = 0.0f;
 	if (capture)
-	{
 		this->applyRelativeMode();
-		this->centerCursor(true);
-	}
 	else
 	{
-		this->ignoreWarp = false;
 		SDL_SetRelativeMouseMode(SDL_FALSE);
-		if (this->window)
-			SDL_SetWindowGrab(this->window, SDL_FALSE);
 		SDL_ShowCursor(SDL_ENABLE);
+		SDL_GetMouseState(&this->mouseX, &this->mouseY);
 	}
 }
 
@@ -104,10 +59,8 @@ void Input::poll()
 {
 	this->mouseDeltaX = 0.0f;
 	this->mouseDeltaY = 0.0f;
-	bool dropWarp = this->ignoreWarp;
-	int dropWarpX = this->ignoreWarpX;
-	int dropWarpY = this->ignoreWarpY;
-	this->ignoreWarp = false;
+	this->menuLeft = false;
+	this->menuRight = false;
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
@@ -117,42 +70,41 @@ void Input::poll()
 		else if (event.type == SDL_WINDOWEVENT
 			&& event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED
 			&& this->mouseCaptured)
-		{
-			this->mouseDeltaX = 0.0f;
-			this->mouseDeltaY = 0.0f;
 			this->applyRelativeMode();
-			this->centerCursor(true);
-		}
-		else if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
+		else if (event.type == SDL_KEYDOWN && event.key.repeat == 0
+			&& event.key.keysym.sym == SDLK_ESCAPE)
+			this->quit = true;
+		else if (event.type == SDL_KEYDOWN)
 		{
-			if (event.key.keysym.sym == SDLK_ESCAPE)
-				this->quit = true;
-			else if (isCtrlKey(event.key.keysym.sym))
-			{
+			SDL_Keycode key = event.key.keysym.sym;
+			if (isCtrlKey(key) && event.key.repeat == 0)
 				this->captureMouse(!this->mouseCaptured);
-				this->mouseDeltaX = 0.0f;
-				this->mouseDeltaY = 0.0f;
-			}
+			else if (key == SDLK_LEFT)
+				this->menuLeft = true;
+			else if (key == SDLK_RIGHT)
+				this->menuRight = true;
 		}
-		else if (event.type == SDL_MOUSEMOTION && this->mouseCaptured)
+		else if (event.type == SDL_MOUSEMOTION)
 		{
-			if (dropWarp
-				&& event.motion.xrel == dropWarpX
-				&& event.motion.yrel == dropWarpY)
+			if (this->mouseCaptured)
 			{
-				dropWarp = false;
-				continue;
+				this->mouseDeltaX += static_cast<float>(event.motion.xrel);
+				this->mouseDeltaY += static_cast<float>(event.motion.yrel);
 			}
-			this->mouseDeltaX += static_cast<float>(event.motion.xrel);
-			this->mouseDeltaY += static_cast<float>(event.motion.yrel);
+			else
+			{
+				this->mouseX = event.motion.x;
+				this->mouseY = event.motion.y;
+			}
 		}
-	}
-
-	if (this->mouseCaptured)
-	{
-		if (SDL_GetRelativeMouseMode() != SDL_TRUE)
-			this->applyRelativeMode();
-		this->centerCursor(false);
+		else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+		{
+			this->mouseDown = true;
+			this->mouseX = event.button.x;
+			this->mouseY = event.button.y;
+		}
+		else if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
+			this->mouseDown = false;
 	}
 
 	const Uint8* keys = SDL_GetKeyboardState(0);

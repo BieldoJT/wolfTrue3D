@@ -3,7 +3,8 @@
 #include <iostream>
 #include <exception>
 
-int main()
+// Assinatura completa: no Windows o SDL renomeia main para SDL_main.
+int main(int, char**)
 {
 	try
 	{

@@ -25,3 +25,10 @@
 ## Testar
 
 Compilar com `make` e rodar `./wolf`. Para mudanças visuais, conferir no jogo real, não só na compilação.
+
+### Windows
+
+No WSL2 o mouse não é capturado de verdade (o WSLg só repassa a posição absoluta do cursor do Windows), então o mouse look só funciona direito no Windows nativo. Para testar:
+
+1. `make deps-win` (uma vez) e `make win`.
+2. Copie `wolf.exe`, `SDL2.dll`, `data/`, `maps/`, `shaders/` e `images/` para uma pasta do Windows (ex.: `/mnt/c/...`) e rode `wolf.exe` a partir dela, pois os caminhos são relativos ao diretório atual.

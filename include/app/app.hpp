@@ -9,6 +9,7 @@
 # include "game/systems/camera_system.hpp"
 # include "game/systems/map_build_system.hpp"
 # include "game/systems/render_system.hpp"
+# include "ui/sensitivity_menu.hpp"
 
 class App
 {
@@ -21,6 +22,7 @@ class App
 		MapBuildSystem mapBuild;
 		CameraSystem cameraSystem;
 		RenderSystem renderSystem;
+		SensitivityMenu sensitivityMenu;
 
 	public:
 		App();

@@ -14,7 +14,7 @@ struct Camera
 		  pitch(0.0f),
 		  fovDegrees(90.0f),
 		  moveSpeed(2.5f),
-		  mouseSensitivity(0.1f)
+		  mouseSensitivity(0.05f)
 	{}
 };
 

@@ -36,8 +36,14 @@ void App::run()
 			dt = MAX_DELTA;
 
 		this->input.poll();
+		Entity* cameraEntity = this->scene.cameraEntity();
+		if (cameraEntity)
+			this->sensitivityMenu.update(this->input, this->window,
+				cameraEntity->camera.mouseSensitivity);
 		this->cameraSystem.update(this->scene, this->input, dt);
 		this->renderSystem.draw(this->scene, this->window, this->shader, this->textures);
+		if (cameraEntity && !this->input.mouseCaptured)
+			this->sensitivityMenu.draw(this->window, cameraEntity->camera.mouseSensitivity);
 		this->window.swap();
 	}
 
