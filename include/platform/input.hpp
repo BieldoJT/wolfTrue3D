@@ -7,12 +7,8 @@ class Input
 {
 	private:
 		SDL_Window* window;
-		bool ignoreWarp;
-		int ignoreWarpX;
-		int ignoreWarpY;
 
 		void applyRelativeMode();
-		void centerCursor(bool discardMotion);
 
 	public:
 		bool quit;
@@ -23,6 +19,11 @@ class Input
 		float mouseDeltaX;
 		float mouseDeltaY;
 		bool mouseCaptured;
+		int mouseX;
+		int mouseY;
+		bool mouseDown;
+		bool menuLeft;
+		bool menuRight;
 
 		Input();
 

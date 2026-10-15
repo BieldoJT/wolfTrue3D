@@ -20,6 +20,8 @@ Documentação detalhada em `docs/`. Leia o que for relevante à tarefa:
 make deps   # instala SDL2 no sistema (GLM já vem em third_party/)
 make        # compila o jogo -> ./wolf
 make re     # recompila do zero
+make deps-win  # MinGW + SDL2 para Windows (cross-compile, 1ª vez)
+make win    # gera wolf.exe + SDL2.dll para rodar no Windows
 ```
 
 O `Makefile` lista os `.cpp` **explicitamente** em `SRC_FILES`: ao criar um arquivo novo, adicione-o lá.

@@ -6,7 +6,8 @@ Marque `[x]` ao concluir. Cada fase deve terminar jogável/testável. Não adian
 
 - [x] Janela SDL2 + contexto OpenGL
 - [x] Shaders, malha de cubo, texturas
-- [x] Câmera FPS com mouse look livre
+- [x] Câmera FPS com mouse look livre  (modo relativo nativo do SDL)
+- [x] Menu temporário de sensibilidade do mouse (Ctrl), provisório até existir um menu/HUD de verdade
 - [x] Mapa em grade carregado de arquivo + catálogo de texturas
 - [x] Colisão do jogador com paredes
 - [x] `make deps` e GLM vendido

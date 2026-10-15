@@ -10,8 +10,12 @@ Window::Window()
 	  glContext(0),
 	  sdlReady(false)
 {
-	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
-	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "1");
+#ifdef __linux__
+	// No WSLg o X11 (XWayland) não entrega mouse relativo de verdade: o cursor
+	// bate na borda da janela. O Wayland nativo tem relative-pointer.
+	// SDL_VIDEODRIVER definido pelo usuário continua tendo prioridade.
+	SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland,x11");
+#endif
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
@@ -60,6 +64,8 @@ Window::Window()
 		sdlReady = false;
 		throw std::runtime_error("Falha ao inicializar o GLAD");
 	}
+
+	std::cout << "Driver de vídeo: " << SDL_GetCurrentVideoDriver() << std::endl;
 
 	int w = width();
 	int h = height();
