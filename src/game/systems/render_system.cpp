@@ -32,14 +32,11 @@ void RenderSystem::draw(Scene& scene, Window& window, Shader& shader, TextureCat
 		sin(pitchRad),
 		sin(yawRad) * cos(pitchRad));
 	front = glm::normalize(front);
-	glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
-	glm::vec3 up = worldUp;
-	glm::vec3 side = glm::cross(front, worldUp);
-	if (glm::dot(side, side) <= 1.0e-8f)
-	{
-		float sign = front.y >= 0.0f ? 1.0f : -1.0f;
-		up = glm::vec3(cos(yawRad) * sign, 0.0f, sin(yawRad) * sign);
-	}
+	// up = worldUp perpendicular a front: continuo em pitch ±90 (sem degenerar)
+	glm::vec3 up(
+		-sin(pitchRad) * cos(yawRad),
+		cos(pitchRad),
+		-sin(pitchRad) * sin(yawRad));
 
 	int w = window.width();
 	int h = window.height();
