@@ -7,6 +7,8 @@ Mapas são arquivos de texto em `maps/`. Devem ser legíveis, editáveis à mão
 ```
 // comentário
 wall 1
+floor 1
+ceiling 1
 ############
 #..........#
 #....##....#
@@ -16,7 +18,9 @@ wall 1
 
 - Linhas começando com `//` são comentários.
 - `wall <id>`: textura das paredes, id do catálogo `data/textures.txt`.
-- Grade: `#` parede, `.` ou espaço vazio, `P` spawn do jogador.
+- `floor <id>` / `ceiling <id>`: textura do chão e do teto (ids do catálogo; opcionais, padrão `1`). A textura se repete uma vez por célula.
+- `wall <símbolo> <id>`: textura das paredes de símbolo `1`-`9` (várias texturas no mesmo mapa). Símbolo sem linha `wall` usa a textura de `#` e gera aviso.
+- Grade: `#` parede (textura de `wall <id>`), `1`-`9` parede com textura própria, `.` ou espaço vazio, `P` spawn do jogador.
 
 ## Formato proposto (v1) **[ABERTO — validar antes de implementar]**
 

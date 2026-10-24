@@ -1,4 +1,5 @@
 #include "ui/sensitivity_menu.hpp"
+#include "game/map_grid.hpp"
 #include "platform/input.hpp"
 #include "platform/window.hpp"
 
@@ -136,7 +137,7 @@ void SensitivityMenu::text(const char* str, int x, int y, int scale, int winH)
 		if (g)
 			for (int row = 0; row < 7; ++row)
 				for (int col = 0; col < 5; ++col)
-					if (g->rows[row][col] == '#')
+					if (MapGrid::isWallCell(g->rows[row][col]))
 						this->rect(x + col * scale, y + row * scale, scale, scale,
 							1.0f, 1.0f, 1.0f, winH);
 		x += 6 * scale;

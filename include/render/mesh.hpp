@@ -16,6 +16,8 @@ class Mesh
 		void draw() const;
 
 		static void uploadUnitCube(Mesh& mesh);
+		// Quad horizontal 1x1 em y=0; a textura se repete tilesU x tilesV vezes.
+		static void uploadPlane(Mesh& mesh, float tilesU, float tilesV);
 };
 
 #endif

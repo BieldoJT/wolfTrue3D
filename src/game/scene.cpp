@@ -26,6 +26,11 @@ Mesh& Scene::cubeMesh()
 	return this->cube;
 }
 
+Mesh& Scene::planeMesh()
+{
+	return this->plane;
+}
+
 MapGrid& Scene::grid()
 {
 	return this->mapGrid;

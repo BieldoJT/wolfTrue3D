@@ -12,6 +12,7 @@ class Scene
 {
 	private:
 		Mesh cube;
+		Mesh plane;
 		std::vector<Entity> entities;
 		MapGrid mapGrid;
 
@@ -22,6 +23,7 @@ class Scene
 		Entity& addEntity();
 		std::vector<Entity>& getEntities();
 		Mesh& cubeMesh();
+		Mesh& planeMesh();
 		MapGrid& grid();
 		Entity* cameraEntity();
 };

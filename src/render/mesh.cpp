@@ -85,3 +85,16 @@ void Mesh::uploadUnitCube(Mesh& mesh)
 	};
 	mesh.upload(vertices, 36);
 }
+
+void Mesh::uploadPlane(Mesh& mesh, float tilesU, float tilesV)
+{
+	float vertices[] = {
+		-0.5f, 0.0f, -0.5f,  0.0f,   0.0f,
+		 0.5f, 0.0f, -0.5f,  tilesU, 0.0f,
+		 0.5f, 0.0f,  0.5f,  tilesU, tilesV,
+		 0.5f, 0.0f,  0.5f,  tilesU, tilesV,
+		-0.5f, 0.0f,  0.5f,  0.0f,   tilesV,
+		-0.5f, 0.0f, -0.5f,  0.0f,   0.0f
+	};
+	mesh.upload(vertices, 6);
+}
