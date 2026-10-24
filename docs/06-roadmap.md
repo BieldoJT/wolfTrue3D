@@ -14,8 +14,8 @@ Marque `[x]` ao concluir. Cada fase deve terminar jogável/testável. Não adian
 
 ## Fase 1 — Mundo sólido
 
-- [ ] Chão e teto renderizados
-- [ ] Várias texturas de parede no mesmo mapa (símbolos `1`-`9`)
+- [x] Chão e teto renderizados (`floor`/`ceiling` no mapa)
+- [x] Várias texturas de parede no mesmo mapa (símbolos `1`-`9`)
 - [ ] Jogo aceita mapa por argumento (`./wolf <mapa>`)
 - [ ] Parser com validação e avisos (ver [03](03-formato-de-mapas.md))
 - [ ] Extrair parser para biblioteca compartilhada

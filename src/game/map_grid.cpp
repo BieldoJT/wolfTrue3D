@@ -14,6 +14,11 @@ namespace
 	}
 }
 
+bool MapGrid::isWallCell(char cell)
+{
+	return cell == '#' || (cell >= '1' && cell <= '9');
+}
+
 bool MapGrid::overlapsWall(float x, float z, float radius) const
 {
 	if (this->cellSize <= 0.0f)
@@ -35,7 +40,7 @@ bool MapGrid::overlapsWall(float x, float z, float radius) const
 		{
 			if (col < 0 || col >= static_cast<int>(cells.size()))
 				return true;
-			if (cells[static_cast<std::size_t>(col)] == '#')
+			if (isWallCell(cells[static_cast<std::size_t>(col)]))
 				return true;
 		}
 	}

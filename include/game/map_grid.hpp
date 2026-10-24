@@ -11,6 +11,9 @@ struct MapGrid
 
 	MapGrid();
 
+	// parede: '#' (textura padrão) ou '1'-'9' (textura por símbolo)
+	static bool isWallCell(char cell);
+
 	bool overlapsWall(float x, float z, float radius) const;
 };
 
