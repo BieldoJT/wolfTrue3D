@@ -30,7 +30,7 @@ Recomendação: **mesmo stack do jogo** (C++, SDL2, OpenGL), como segundo execut
 
 ## Requisitos para o jogo
 
-O jogo precisa aceitar o mapa por argumento de linha de comando (`./wolf <mapa>`), hoje fixo em `maps/level1.txt`.
+O jogo aceita o mapa por argumento de linha de comando (`./wolf <mapa>`); sem argumento, usa `maps/level1.txt`.
 
 ## Fora do escopo do editor v1
 

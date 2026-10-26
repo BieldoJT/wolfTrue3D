@@ -11,6 +11,8 @@
 # include "game/systems/render_system.hpp"
 # include "ui/sensitivity_menu.hpp"
 
+# include <string>
+
 class App
 {
 	private:
@@ -25,7 +27,7 @@ class App
 		SensitivityMenu sensitivityMenu;
 
 	public:
-		App();
+		App(const std::string& mapPath);
 		void run();
 };
 
