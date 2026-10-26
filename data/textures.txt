@@ -3,3 +3,4 @@
 // O mapa referencia o id (linha wall), não o caminho.
 1 images/CRVascodaGama png.png
 2 images/chao_terra.jpg
+3 images/logo_cuiaba.png

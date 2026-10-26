@@ -39,4 +39,4 @@ Abre o editor → desenha paredes na grade → escolhe texturas do catálogo →
 
 ## Estado atual (resumo)
 
-Já existe: janela SDL2, render OpenGL de cubos, câmera com mouse look, colisão contra paredes da grade, mapa carregado de `maps/level1.txt` e catálogo de texturas. Veja o [roadmap](06-roadmap.md) para o resto.
+Já existe: janela SDL2, render OpenGL de cubos, câmera com mouse look, colisão contra paredes da grade, mapa carregado por argumento (`./wolf <mapa>`, padrão `maps/level1.txt`) e catálogo de texturas. Veja o [roadmap](06-roadmap.md) para o resto.

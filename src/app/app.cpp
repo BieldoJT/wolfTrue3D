@@ -7,19 +7,18 @@
 namespace
 {
 	const char* TEXTURE_CATALOG = "data/textures.txt";
-	const char* MAP_PATH = "maps/level1.txt";
 	const float MAX_DELTA = 0.05f;
 }
 
-App::App()
+App::App(const std::string& mapPath)
 	: shader("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl")
 {
 	this->input.attachWindow(this->window.sdlWindow());
 	this->input.captureMouse(true);
 	if (!this->textures.load(TEXTURE_CATALOG))
 		throw std::runtime_error("Não foi possível carregar o catálogo de texturas");
-	if (!this->mapBuild.build(this->scene, MAP_PATH))
-		throw std::runtime_error("Não foi possível carregar o mapa");
+	if (!this->mapBuild.build(this->scene, mapPath.c_str()))
+		throw std::runtime_error("Não foi possível carregar o mapa: " + mapPath);
 }
 
 void App::run()
