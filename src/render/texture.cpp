@@ -2,25 +2,10 @@
 
 #include <glad/glad.h>
 #include "stb_image.h"
+#include "map/catalog.hpp"
 
-#include <cctype>
-#include <fstream>
 #include <iostream>
-#include <sstream>
-
-namespace
-{
-	void trim(std::string& text)
-	{
-		while (!text.empty() && std::isspace(static_cast<unsigned char>(text[text.size() - 1])))
-			text.erase(text.size() - 1);
-		std::size_t start = 0;
-		while (start < text.size() && std::isspace(static_cast<unsigned char>(text[start])))
-			++start;
-		if (start > 0)
-			text.erase(0, start);
-	}
-}
+#include <vector>
 
 Texture::Texture()
 	: id(0)
@@ -72,58 +57,30 @@ void Texture::bind() const
 
 bool TextureCatalog::load(const std::string& catalogPath)
 {
-	std::ifstream file(catalogPath.c_str());
-	if (!file)
-	{
-		std::cerr << "Falha ao abrir catálogo de texturas: " << catalogPath << std::endl;
+	std::map<int, std::string> entries;
+	std::vector<MapMessage> messages;
+	bool ok = readTextureCatalog(catalogPath, entries, messages);
+	printMapMessages(std::cerr, catalogPath, messages);
+	if (!ok)
 		return false;
-	}
 
-	std::string line;
-	int lineNo = 0;
-	while (std::getline(file, line))
+	for (std::map<int, std::string>::const_iterator it = entries.begin(); it != entries.end(); ++it)
 	{
-		++lineNo;
-		trim(line);
-		if (line.empty() || line[0] == '#')
-			continue;
-		if (line.size() >= 2 && line[0] == '/' && line[1] == '/')
-			continue;
-
-		std::istringstream iss(line);
-		int textureId = 0;
-		if (!(iss >> textureId))
-		{
-			std::cerr << "Id inválido em " << catalogPath << ":" << lineNo << std::endl;
-			return false;
-		}
-
-		std::string path;
-		std::getline(iss, path);
-		trim(path);
-		if (path.empty())
-		{
-			std::cerr << "Caminho vazio em " << catalogPath << ":" << lineNo << std::endl;
-			return false;
-		}
-		if (this->textures.find(textureId) != this->textures.end())
-		{
-			std::cerr << "Id de textura repetido: " << textureId << std::endl;
-			return false;
-		}
-
 		std::unique_ptr<Texture> texture(new Texture());
-		if (!texture->loadFromFile(path))
+		if (!texture->loadFromFile(it->second))
 			return false;
-		this->textures[textureId] = std::move(texture);
-	}
-
-	if (this->textures.empty())
-	{
-		std::cerr << "Catálogo de texturas vazio: " << catalogPath << std::endl;
-		return false;
+		this->textures[it->first] = std::move(texture);
 	}
 	return true;
+}
+
+std::set<int> TextureCatalog::ids() const
+{
+	std::set<int> result;
+	for (std::map<int, std::unique_ptr<Texture> >::const_iterator it = this->textures.begin();
+		it != this->textures.end(); ++it)
+		result.insert(it->first);
+	return result;
 }
 
 Texture* TextureCatalog::find(int textureId) const

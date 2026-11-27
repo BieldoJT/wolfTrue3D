@@ -1,0 +1,5 @@
+// espera: aviso
+wall 1
+#####
+#P..3
+#####

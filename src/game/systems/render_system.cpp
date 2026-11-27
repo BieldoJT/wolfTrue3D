@@ -8,6 +8,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <cmath>
 #include <iostream>
 
 RenderSystem::RenderSystem()
@@ -58,6 +59,8 @@ void RenderSystem::draw(Scene& scene, Window& window, Shader& shader, TextureCat
 		Entity& entity = entities[i];
 		if (!entity.hasTransform || !entity.hasMeshRenderer || !entity.meshRenderer.mesh)
 			continue;
+		if (entity.hasPickup && entity.pickup.collected)
+			continue;
 
 		Texture* texture = textures.find(entity.meshRenderer.textureId);
 		if (!texture)
@@ -72,6 +75,13 @@ void RenderSystem::draw(Scene& scene, Window& window, Shader& shader, TextureCat
 
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, entity.transform.position);
+		if (entity.meshRenderer.billboard)
+		{
+			// Sprite: gira só em Y para encarar a câmera (estilo Wolfenstein).
+			float angle = std::atan2(position.x - entity.transform.position.x,
+				position.z - entity.transform.position.z);
+			model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
+		}
 		model = glm::scale(model, entity.transform.scale);
 		shader.setMat4("model", model);
 		texture->bind();

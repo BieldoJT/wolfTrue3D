@@ -22,9 +22,14 @@ make        # compila o jogo -> ./wolf
 make re     # recompila do zero
 make deps-win  # MinGW + SDL2 para Windows (cross-compile, 1ª vez)
 make win    # gera wolf.exe + SDL2.dll para rodar no Windows
+make mapcheck  # validador de mapas sem SDL/GL: ./mapcheck --catalog data/textures.txt --items data/items.txt maps/*.txt
+make test   # roda o mapcheck nos casos de tests/maps/ e nos mapas de maps/
+python3 scripts/gerar-assets.py  # recria os PNGs de portas, saída e itens em images/
 ```
 
-O `Makefile` lista os `.cpp` **explicitamente** em `SRC_FILES`: ao criar um arquivo novo, adicione-o lá.
+Controles: WASD anda, mouse olha, E/espaço usa (portas e interruptor de saída), Ctrl abre o menu de sensibilidade, Enter recomeça na tela de fim, Esc sai.
+
+O `Makefile` lista os `.cpp` **explicitamente** em `SRC_FILES` (e os do formato de mapa em `MAP_FILES`): ao criar um arquivo novo, adicione-o lá.
 
 ## Regras do projeto
 

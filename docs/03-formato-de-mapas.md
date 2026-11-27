@@ -9,18 +9,58 @@ Mapas são arquivos de texto em `maps/`. Devem ser legíveis, editáveis à mão
 wall 1
 floor 1
 ceiling 1
-############
-#..........#
-#....##....#
-#..P.......#
-############
+door 4
+locked 5
+exit 6
+next level2.txt
+##############
+#..........#X#
+#....##....#.#
+#..P..A..H.L.#
+#####D########
+#..K.#########
+##############
 ```
 
 - Linhas começando com `//` são comentários.
 - `wall <id>`: textura das paredes, id do catálogo `data/textures.txt`.
 - `floor <id>` / `ceiling <id>`: textura do chão e do teto (ids do catálogo; opcionais, padrão `1`). A textura se repete uma vez por célula.
 - `wall <símbolo> <id>`: textura das paredes de símbolo `1`-`9` (várias texturas no mesmo mapa). Símbolo sem linha `wall` usa a textura de `#` e gera aviso.
+- `door <id>` / `locked <id>` / `exit <id>`: texturas da porta `D`, da porta trancada `L` e do interruptor de saída `X`. Sem a linha, `D` e `X` usam a textura de `#` e `L` a de `door` (ou `#`), com aviso.
+- `next <arquivo>`: próximo mapa, **relativo à pasta deste mapa** (`next level2.txt`). Sem `next`, acionar o `X` encerra o jogo (tela de fim).
 - Grade: `#` parede (textura de `wall <id>`), `1`-`9` parede com textura própria, `.` ou espaço vazio, `P` spawn do jogador.
+- `D` porta (abre com **E**/espaço, fica aberta 4 s e fecha sozinha), `L` porta trancada (abre só depois de pegar uma chave), `X` interruptor de saída (parede: encoste e aperte **E** para ir ao `next`). Portas precisam de paredes em dois lados opostos, que definem para onde a folha desliza.
+- Outras letras maiúsculas (exceto `P`, `D`, `L`, `X`) são **itens** do catálogo `data/items.txt` (ver [05](05-assets.md)); hoje `A` munição, `H` vida, `K` chave.
+- Linhas que começam com letra minúscula são diretivas; diretiva desconhecida gera **aviso** e é ignorada (a grade nunca tem minúsculas).
+
+### Validação do v0 (implementada)
+
+Mensagens no formato `arquivo:linha: erro|aviso: texto`. **Erro** impede o carregamento; **aviso** só informa.
+
+| Tipo | Regra |
+|---|---|
+| erro | Arquivo não abre |
+| erro | Mapa sem grade |
+| erro | Caractere inválido na grade |
+| erro | `wall`/`floor`/`ceiling`/`door`/`locked`/`exit` sem id inteiro maior que zero, símbolo fora de `1`-`9`, ou `next` sem arquivo |
+| erro | Nenhum spawn `P` |
+| aviso | Texto extra depois do id (ignorado) |
+| aviso | Diretiva desconhecida (ignorada) |
+| aviso | Diretiva repetida (vale a última) |
+| aviso | Mais de um `P` (vale o primeiro) |
+| aviso | Grade não retangular |
+| aviso | Mapa aberto: do spawn dá para andar até fora da grade |
+| aviso | Id de textura que não existe em `data/textures.txt` |
+| aviso | Símbolo `1`-`9` sem `wall N <id>` (usa a textura de `#`), ou `wall N` sem uso na grade |
+| aviso | `#` na grade sem linha `wall <id>` (usa a textura 1) |
+| aviso | `D`/`L`/`X` sem a linha `door`/`locked`/`exit`, ou a linha sem uso na grade |
+| aviso | Porta sem paredes em dois lados opostos |
+| aviso | Letra de item que não existe em `data/items.txt` (célula fica vazia) ou com sprite fora do catálogo de texturas |
+| aviso | `L` no mapa sem nenhum item de efeito `key` |
+| aviso | Nenhum `X` alcançável a partir do spawn (portas contam como passagem) |
+| aviso | `next` sem `X` na grade, ou arquivo de `next` não encontrado |
+
+Para conferir mapas sem abrir o jogo: `make mapcheck` e `./mapcheck --catalog data/textures.txt --items data/items.txt maps/*.txt`. Casos de teste em `tests/maps/` (`make test`).
 
 ## Formato proposto (v1) **[ABERTO — validar antes de implementar]**
 
@@ -68,4 +108,11 @@ exit 8 1
 
 ## Onde fica o código
 
-Parser/serializador numa biblioteca única usada por jogo e editor (hoje o carregamento está em `src/game/map_grid.cpp` e `scene.cpp`; extrair quando o editor começar).
+Biblioteca de formato em `include/map/` e `src/map/`, só com a biblioteca padrão (sem SDL/OpenGL), usada pelo jogo, pelo `mapcheck` e, no futuro, pelo editor:
+
+- `map_parser` — `loadMapFile`/`parseMap`: sintaxe (diretivas e grade) → `MapData`.
+- `map_validator` — `validateMap`: regras de conteúdo (spawn, mapa fechado, texturas).
+- `catalog` — `readTextureCatalog` / `readItemCatalog`: lê `data/textures.txt` e `data/items.txt` sem carregar imagens.
+- `map_messages` — `MapMessage` (erro/aviso + linha) e impressão.
+
+O serializador (salvar mapa) entra junto com o editor.

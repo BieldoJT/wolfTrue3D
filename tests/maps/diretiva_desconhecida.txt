@@ -1,0 +1,6 @@
+// espera: aviso
+wall 1
+music tema.ogg
+#####
+#P..#
+#####

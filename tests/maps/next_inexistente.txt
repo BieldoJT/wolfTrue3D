@@ -1,0 +1,7 @@
+// espera: aviso
+wall 1
+exit 6
+next nao_existe.txt
+######
+#P..X#
+######

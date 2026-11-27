@@ -16,16 +16,16 @@ Marque `[x]` ao concluir. Cada fase deve terminar jogável/testável. Não adian
 
 - [x] Chão e teto renderizados (`floor`/`ceiling` no mapa)
 - [x] Várias texturas de parede no mesmo mapa (símbolos `1`-`9`)
-- [ ] Jogo aceita mapa por argumento (`./wolf <mapa>`)
-- [ ] Parser com validação e avisos (ver [03](03-formato-de-mapas.md))
-- [ ] Extrair parser para biblioteca compartilhada
+- [x] Jogo aceita mapa por argumento (`./wolf <mapa>`)
+- [x] Parser com validação e avisos (ver [03](03-formato-de-mapas.md))
+- [x] Extrair parser para biblioteca compartilhada (`map/` + ferramenta `mapcheck`)
 
 ## Fase 2 — Interação
 
-- [ ] Portas (abrem/fecham)
-- [ ] Itens coletáveis (munição, vida, chaves)
-- [ ] Saída de fase e troca de mapa
-- [ ] HUD mínimo (vida, munição)
+- [x] Portas (abrem/fecham)
+- [x] Itens coletáveis (munição, vida, chaves)
+- [x] Saída de fase e troca de mapa
+- [x] HUD mínimo (vida, munição)
 
 ## Fase 3 — Combate
 

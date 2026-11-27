@@ -3,6 +3,14 @@
 Scene::Scene()
 {
 	Mesh::uploadUnitCube(this->cube);
+	Mesh::uploadQuad(this->quad);
+}
+
+void Scene::clear()
+{
+	this->entities.clear();
+	this->mapGrid = MapGrid();
+	this->gameEvents = GameEvents();
 }
 
 void Scene::reserve(std::size_t count)
@@ -29,6 +37,16 @@ Mesh& Scene::cubeMesh()
 Mesh& Scene::planeMesh()
 {
 	return this->plane;
+}
+
+Mesh& Scene::quadMesh()
+{
+	return this->quad;
+}
+
+GameEvents& Scene::events()
+{
+	return this->gameEvents;
 }
 
 MapGrid& Scene::grid()

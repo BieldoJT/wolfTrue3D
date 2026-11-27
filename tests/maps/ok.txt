@@ -1,0 +1,8 @@
+// espera: ok
+wall 1
+wall 2 2
+floor 2
+ceiling 1
+#####
+#P..2
+#####

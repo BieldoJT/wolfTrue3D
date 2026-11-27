@@ -3,6 +3,7 @@
 
 # include <map>
 # include <memory>
+# include <set>
 # include <string>
 
 class Texture
@@ -26,6 +27,7 @@ class TextureCatalog
 	public:
 		bool load(const std::string& catalogPath);
 		Texture* find(int textureId) const;
+		std::set<int> ids() const;
 };
 
 #endif
