@@ -25,6 +25,9 @@ Input::Input()
 	  mouseDown(false),
 	  menuLeft(false),
 	  menuRight(false),
+	  menuUp(false),
+	  menuDown(false),
+	  mouseClicked(false),
 	  use(false),
 	  confirm(false)
 {}
@@ -63,6 +66,9 @@ void Input::poll()
 	this->mouseDeltaY = 0.0f;
 	this->menuLeft = false;
 	this->menuRight = false;
+	this->menuUp = false;
+	this->menuDown = false;
+	this->mouseClicked = false;
 	this->use = false;
 	this->confirm = false;
 
@@ -91,6 +97,10 @@ void Input::poll()
 				this->menuLeft = true;
 			else if (key == SDLK_RIGHT)
 				this->menuRight = true;
+			else if (key == SDLK_UP)
+				this->menuUp = true;
+			else if (key == SDLK_DOWN)
+				this->menuDown = true;
 		}
 		else if (event.type == SDL_MOUSEMOTION)
 		{
@@ -108,6 +118,7 @@ void Input::poll()
 		else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
 		{
 			this->mouseDown = true;
+			this->mouseClicked = true;
 			this->mouseX = event.button.x;
 			this->mouseY = event.button.y;
 		}

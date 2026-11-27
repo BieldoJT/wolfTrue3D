@@ -4,6 +4,7 @@
 #include "map/map_validator.hpp"
 
 #include <SDL.h>
+#include <glad/glad.h>
 #include <iostream>
 #include <set>
 #include <stdexcept>
@@ -13,14 +14,19 @@ namespace
 {
 	const char* TEXTURE_CATALOG = "data/textures.txt";
 	const char* ITEM_CATALOG = "data/items.txt";
+	const char* SETTINGS_FILE = "settings.txt";
 	const float MAX_DELTA = 0.05f;
 }
 
 App::App(const std::string& mapPath)
-	: shader("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl"),
+	: settings(loadSettings(SETTINGS_FILE)),
+	  window(settings.resolution, settings.mode),
+	  shader("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl"),
 	  firstMapPath(mapPath),
+	  menuOpen(false),
 	  gameOver(false)
 {
+	this->settings.mode = this->window.displayMode();	// o modo salvo pode ter sido recusado
 	this->input.attachWindow(this->window.sdlWindow());
 	this->input.captureMouse(true);
 	if (!this->textures.load(TEXTURE_CATALOG))
@@ -52,14 +58,9 @@ bool App::loadLevel(const std::string& mapPath, const PlayerStats& stats)
 
 	PlayerStats carried = stats;
 	carried.hasKey = false;
-	float sensitivity = -1.0f;
-	if (Entity* old = this->scene.cameraEntity())
-		sensitivity = old->camera.mouseSensitivity;
-
 	this->scene.clear();
 	this->mapBuild.build(this->scene, map, this->items, carried);
-	if (sensitivity > 0.0f)
-		this->scene.cameraEntity()->camera.mouseSensitivity = sensitivity;
+	this->scene.cameraEntity()->camera.mouseSensitivity = this->settings.mouseSensitivity;
 	this->nextMapPath = map.nextMapPath;
 	std::cout << "Mapa carregado: " << mapPath << std::endl;
 	return true;
@@ -82,6 +83,37 @@ void App::finishLevel()
 	}
 }
 
+void App::updateMenu()
+{
+	bool open = !this->input.mouseCaptured;
+	if (open && !this->menuOpen)
+		this->optionsMenu.open(this->window, this->settings);
+	if (!open && this->menuOpen)
+		saveSettings(SETTINGS_FILE, this->settings);
+	this->menuOpen = open;
+	if (!open)
+		return;
+
+	OptionsMenu::Action action = this->optionsMenu.update(this->input, this->window, this->settings);
+	if (action == OptionsMenu::Close)
+	{
+		this->input.captureMouse(true);
+		this->menuOpen = false;
+		saveSettings(SETTINGS_FILE, this->settings);
+	}
+	else if (action == OptionsMenu::Save)
+		saveSettings(SETTINGS_FILE, this->settings);
+
+	if (Entity* player = this->scene.cameraEntity())
+		player->camera.mouseSensitivity = this->settings.mouseSensitivity;
+}
+
+void App::drawMenu()
+{
+	if (this->menuOpen)
+		this->optionsMenu.draw(this->window, this->settings);
+}
+
 void App::run()
 {
 	Uint64 last = SDL_GetPerformanceCounter();
@@ -97,21 +129,25 @@ void App::run()
 
 		this->input.poll();
 
+		this->updateMenu();
+
 		if (this->gameOver)
 		{
-			if (this->input.confirm && this->loadLevel(this->firstMapPath, PlayerStats()))
+			if (!this->menuOpen && this->input.confirm && this->loadLevel(this->firstMapPath, PlayerStats()))
 				this->gameOver = false;
+			glViewport(0, 0, this->window.width(), this->window.height());
 			this->hud.drawGameOver(this->window);
+			this->drawMenu();
 			this->window.swap();
 			continue;
 		}
 
-		Entity* cameraEntity = this->scene.cameraEntity();
-		if (cameraEntity)
-			this->sensitivityMenu.update(this->input, this->window,
-				cameraEntity->camera.mouseSensitivity);
-		this->cameraSystem.update(this->scene, this->input, dt);
-		this->interactionSystem.update(this->scene, this->input);
+		// Com o menu aberto o jogador fica parado (portas e itens seguem normais).
+		if (!this->menuOpen)
+		{
+			this->cameraSystem.update(this->scene, this->input, dt);
+			this->interactionSystem.update(this->scene, this->input);
+		}
 		this->doorSystem.update(this->scene, dt);
 		this->pickupSystem.update(this->scene);
 
@@ -125,11 +161,10 @@ void App::run()
 		}
 
 		this->renderSystem.draw(this->scene, this->window, this->shader, this->textures);
-		cameraEntity = this->scene.cameraEntity();
+		Entity* cameraEntity = this->scene.cameraEntity();
 		if (cameraEntity && cameraEntity->hasPlayerStats)
 			this->hud.draw(this->window, cameraEntity->playerStats, events);
-		if (cameraEntity && !this->input.mouseCaptured)
-			this->sensitivityMenu.draw(this->window, cameraEntity->camera.mouseSensitivity);
+		this->drawMenu();
 		this->window.swap();
 	}
 

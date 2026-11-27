@@ -6,3 +6,4 @@ wolf.exe
 SDL2.dll
 third_party/SDL2-win/
 mapcheck
+settings.txt
