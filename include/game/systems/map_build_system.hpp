@@ -1,14 +1,14 @@
 #ifndef GAME_MAP_BUILD_SYSTEM_HPP
 # define GAME_MAP_BUILD_SYSTEM_HPP
 
-# include <string>
-
 class Scene;
+struct MapData;
 
+// Monta a cena (chão, teto, paredes e jogador) a partir de um mapa já lido e validado.
 class MapBuildSystem
 {
 	public:
-		bool build(Scene& scene, const std::string& mapPath);
+		void build(Scene& scene, const MapData& map);
 };
 
 #endif

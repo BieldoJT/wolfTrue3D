@@ -1,0 +1,2 @@
+// espera: erro
+wall 1

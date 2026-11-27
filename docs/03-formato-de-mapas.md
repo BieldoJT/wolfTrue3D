@@ -21,6 +21,30 @@ ceiling 1
 - `floor <id>` / `ceiling <id>`: textura do chão e do teto (ids do catálogo; opcionais, padrão `1`). A textura se repete uma vez por célula.
 - `wall <símbolo> <id>`: textura das paredes de símbolo `1`-`9` (várias texturas no mesmo mapa). Símbolo sem linha `wall` usa a textura de `#` e gera aviso.
 - Grade: `#` parede (textura de `wall <id>`), `1`-`9` parede com textura própria, `.` ou espaço vazio, `P` spawn do jogador.
+- Linhas que começam com letra minúscula são diretivas; diretiva desconhecida gera **aviso** e é ignorada (a grade nunca tem minúsculas).
+
+### Validação do v0 (implementada)
+
+Mensagens no formato `arquivo:linha: erro|aviso: texto`. **Erro** impede o carregamento; **aviso** só informa.
+
+| Tipo | Regra |
+|---|---|
+| erro | Arquivo não abre |
+| erro | Mapa sem grade |
+| erro | Caractere inválido na grade |
+| erro | `wall`/`floor`/`ceiling` sem id inteiro maior que zero, ou símbolo fora de `1`-`9` |
+| erro | Nenhum spawn `P` |
+| aviso | Texto extra depois do id (ignorado) |
+| aviso | Diretiva desconhecida (ignorada) |
+| aviso | Diretiva repetida (vale a última) |
+| aviso | Mais de um `P` (vale o primeiro) |
+| aviso | Grade não retangular |
+| aviso | Mapa aberto: do spawn dá para andar até fora da grade |
+| aviso | Id de textura que não existe em `data/textures.txt` |
+| aviso | Símbolo `1`-`9` sem `wall N <id>` (usa a textura de `#`), ou `wall N` sem uso na grade |
+| aviso | `#` na grade sem linha `wall <id>` (usa a textura 1) |
+
+Para conferir mapas sem abrir o jogo: `make mapcheck` e `./mapcheck --catalog data/textures.txt maps/*.txt`. Casos de teste em `tests/maps/` (`make test`).
 
 ## Formato proposto (v1) **[ABERTO — validar antes de implementar]**
 
@@ -68,4 +92,11 @@ exit 8 1
 
 ## Onde fica o código
 
-Parser/serializador numa biblioteca única usada por jogo e editor (hoje o carregamento está em `src/game/map_grid.cpp` e `scene.cpp`; extrair quando o editor começar).
+Biblioteca de formato em `include/map/` e `src/map/`, só com a biblioteca padrão (sem SDL/OpenGL), usada pelo jogo, pelo `mapcheck` e, no futuro, pelo editor:
+
+- `map_parser` — `loadMapFile`/`parseMap`: sintaxe (diretivas e grade) → `MapData`.
+- `map_validator` — `validateMap`: regras de conteúdo (spawn, mapa fechado, texturas).
+- `catalog` — `readTextureCatalog`: lê `data/textures.txt` sem carregar imagens.
+- `map_messages` — `MapMessage` (erro/aviso + linha) e impressão.
+
+O serializador (salvar mapa) entra junto com o editor.

@@ -14,6 +14,7 @@ Ambos compartilham uma **biblioteca de formato de mapa** (parser/serializador + 
 | Pasta | Responsabilidade |
 |---|---|
 | `app/` | Ciclo de vida: init, loop principal, encerramento |
+| `map/` | Biblioteca de formato: parser, validador e catálogo de texturas, sem SDL/GL (compartilhada com `mapcheck` e o editor) |
 | `platform/` | Janela SDL2 e entrada (teclado/mouse) |
 | `render/` | `Shader`, `Mesh`, `Texture` — wrappers de OpenGL |
 | `game/` | `Scene`, `Entity`, componentes, `MapGrid` |
@@ -26,8 +27,8 @@ Ambos compartilham uma **biblioteca de formato de mapa** (parser/serializador + 
 
 Fluxo atual:
 
-1. `Scene` carrega o mapa (`MapGrid`: `rows` de texto + `cellSize`).
-2. `MapBuildSystem` percorre a grade e cria uma entidade-cubo por parede.
+1. `App` lê o catálogo de texturas, chama `loadMapFile` + `validateMap` (módulo `map/`) e imprime erros/avisos; com erro, encerra.
+2. `MapBuildSystem` recebe o `MapData` validado, preenche o `MapGrid` da `Scene` e cria chão, teto, uma entidade-cubo por parede e o jogador.
 3. `CameraSystem` lê a entrada, move o jogador e testa `MapGrid::overlapsWall`.
 4. `RenderSystem` desenha as entidades com `MeshRenderer`.
 

@@ -5,7 +5,15 @@ CXXFLAGS = -std=c++14
 # GLM é header vendido. SDL2 e OpenGL ficam no sistema (make deps).
 INCLUDES = -Iinclude -I. -Ithird_party/glm
 SRC_DIR = src
+# Biblioteca de formato de mapa: só biblioteca padrão, compartilhada por jogo, mapcheck e editor.
+MAP_FILES = map/map_data.cpp \
+	map/map_messages.cpp \
+	map/map_parser.cpp \
+	map/map_validator.cpp \
+	map/catalog.cpp
+MAP_SRC = $(addprefix $(SRC_DIR)/, $(MAP_FILES))
 SRC_FILES = main.cpp glad.c stb_image.cpp \
+	$(MAP_FILES) \
 	platform/window.cpp \
 	platform/input.cpp \
 	render/shader.cpp \
@@ -20,7 +28,7 @@ SRC_FILES = main.cpp glad.c stb_image.cpp \
 	app/app.cpp
 SRC = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 
-.PHONY: all clean re deps deps-win win
+.PHONY: all clean re deps deps-win win test
 
 all: $(NAME)
 
@@ -59,8 +67,17 @@ $(NAME): $(SRC)
 	@clear >/dev/null 2>&1 || true
 	@echo "✅ ${NAME} is compiled."
 
+# Validador de mapas em linha de comando (não precisa de SDL/OpenGL).
+MAPCHECK = mapcheck
+
+$(MAPCHECK): tools/mapcheck.cpp $(MAP_SRC)
+	$(COMPILER) $(CXXFLAGS) -Wall -Wextra -Iinclude tools/mapcheck.cpp $(MAP_SRC) -o $(MAPCHECK)
+
+test: $(MAPCHECK)
+	bash scripts/test-maps.sh
+
 clean:
-	rm -rf $(NAME) $(WIN_EXE) SDL2.dll
+	rm -rf $(NAME) $(WIN_EXE) SDL2.dll $(MAPCHECK)
 	@clear >/dev/null 2>&1 || true
 	@echo "🗑️ executable removed."
 

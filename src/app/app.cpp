@@ -1,8 +1,13 @@
 #include "app/app.hpp"
+#include "map/map_data.hpp"
+#include "map/map_parser.hpp"
+#include "map/map_validator.hpp"
 
 #include <SDL.h>
 #include <iostream>
+#include <set>
 #include <stdexcept>
+#include <vector>
 
 namespace
 {
@@ -17,8 +22,16 @@ App::App(const std::string& mapPath)
 	this->input.captureMouse(true);
 	if (!this->textures.load(TEXTURE_CATALOG))
 		throw std::runtime_error("Não foi possível carregar o catálogo de texturas");
-	if (!this->mapBuild.build(this->scene, mapPath.c_str()))
+
+	MapData map;
+	std::vector<MapMessage> messages;
+	std::set<int> textureIds = this->textures.ids();
+	if (loadMapFile(mapPath, map, messages))
+		validateMap(map, &textureIds, messages);
+	printMapMessages(std::cerr, mapPath, messages);
+	if (hasMapErrors(messages))
 		throw std::runtime_error("Não foi possível carregar o mapa: " + mapPath);
+	this->mapBuild.build(this->scene, map);
 }
 
 void App::run()

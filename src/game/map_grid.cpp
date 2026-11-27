@@ -1,4 +1,5 @@
 #include "game/map_grid.hpp"
+#include "map/map_data.hpp"
 
 #include <cmath>
 
@@ -16,7 +17,7 @@ namespace
 
 bool MapGrid::isWallCell(char cell)
 {
-	return cell == '#' || (cell >= '1' && cell <= '9');
+	return isMapWallCell(cell);
 }
 
 bool MapGrid::overlapsWall(float x, float z, float radius) const
