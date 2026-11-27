@@ -1,0 +1,8 @@
+// Itens coletáveis: símbolo nome textura efeito quantidade
+// - símbolo: letra maiúscula usada na grade do mapa (exceto P, D, L e X)
+// - textura: id do sprite em data/textures.txt (PNG com fundo transparente)
+// - efeito: ammo (munição), health (vida) ou key (chave das portas 'L')
+// Para criar um item novo: desenhe o sprite, registre em textures.txt e acrescente uma linha aqui.
+A municao 7 ammo 8
+H vida 8 health 25
+K chave 9 key 1

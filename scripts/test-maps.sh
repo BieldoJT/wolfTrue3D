@@ -5,13 +5,14 @@ set -u
 cd "$(dirname "$0")/.."
 
 CATALOG=data/textures.txt
+ITEMS=data/items.txt
 falhas=0
 total=0
 
 for mapa in tests/maps/*.txt; do
 	total=$((total + 1))
 	esperado=$(head -n 1 "$mapa" | sed -n 's#^// espera: *\([a-z]*\).*#\1#p')
-	saida=$(./mapcheck --catalog "$CATALOG" "$mapa")
+	saida=$(./mapcheck --catalog "$CATALOG" --items "$ITEMS" "$mapa")
 	if grep -q ': erro:' <<<"$saida"; then
 		obtido=erro
 	elif grep -q ': aviso:' <<<"$saida"; then
@@ -30,11 +31,11 @@ done
 
 for mapa in maps/*.txt; do
 	total=$((total + 1))
-	if ./mapcheck --catalog "$CATALOG" "$mapa" >/dev/null; then
+	if ./mapcheck --catalog "$CATALOG" --items "$ITEMS" "$mapa" >/dev/null; then
 		echo "ok    $mapa (carrega)"
 	else
 		echo "FALHA $mapa não carrega:"
-		./mapcheck --catalog "$CATALOG" "$mapa" | sed 's/^/      /'
+		./mapcheck --catalog "$CATALOG" --items "$ITEMS" "$mapa" | sed 's/^/      /'
 		falhas=$((falhas + 1))
 	fi
 done

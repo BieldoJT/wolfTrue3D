@@ -14,4 +14,26 @@ bool readTextureCatalog(const std::string& path, std::map<int, std::string>& out
 
 std::set<int> catalogIds(const std::map<int, std::string>& catalog);
 
+// Item coletável de data/items.txt: "símbolo nome textura efeito quantidade".
+struct ItemDef
+{
+	enum Effect
+	{
+		Ammo,
+		Health,
+		Key
+	};
+
+	char symbol;		// letra maiúscula usada na grade
+	std::string name;
+	int textureId;		// sprite (id de data/textures.txt)
+	Effect effect;
+	int amount;
+
+	ItemDef();
+};
+
+// Lê data/items.txt. Retorna false se houver erro.
+bool readItemCatalog(const std::string& path, std::map<char, ItemDef>& out, std::vector<MapMessage>& messages);
+
 #endif

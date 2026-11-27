@@ -24,6 +24,11 @@ SRC_FILES = main.cpp glad.c stb_image.cpp \
 	game/systems/camera_system.cpp \
 	game/systems/map_build_system.cpp \
 	game/systems/render_system.cpp \
+	game/systems/interaction_system.cpp \
+	game/systems/door_system.cpp \
+	game/systems/pickup_system.cpp \
+	ui/pixel_text.cpp \
+	ui/hud.cpp \
 	ui/sensitivity_menu.cpp \
 	app/app.cpp
 SRC = $(addprefix $(SRC_DIR)/, $(SRC_FILES))

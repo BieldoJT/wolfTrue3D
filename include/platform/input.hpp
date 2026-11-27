@@ -24,6 +24,8 @@ class Input
 		bool mouseDown;
 		bool menuLeft;
 		bool menuRight;
+		bool use;		// E ou espaço, só no quadro em que foi apertado
+		bool confirm;	// Enter, só no quadro em que foi apertado
 
 		Input();
 

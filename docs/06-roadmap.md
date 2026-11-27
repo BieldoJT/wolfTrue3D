@@ -22,10 +22,10 @@ Marque `[x]` ao concluir. Cada fase deve terminar jogável/testável. Não adian
 
 ## Fase 2 — Interação
 
-- [ ] Portas (abrem/fecham)
-- [ ] Itens coletáveis (munição, vida, chaves)
-- [ ] Saída de fase e troca de mapa
-- [ ] HUD mínimo (vida, munição)
+- [x] Portas (abrem/fecham)
+- [x] Itens coletáveis (munição, vida, chaves)
+- [x] Saída de fase e troca de mapa
+- [x] HUD mínimo (vida, munição)
 
 ## Fase 3 — Combate
 

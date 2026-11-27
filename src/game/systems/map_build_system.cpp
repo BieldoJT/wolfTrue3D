@@ -6,9 +6,24 @@
 namespace
 {
 	const float CELL = 1.0f;
+	const float DOOR_THICKNESS = 0.1f;
+	const float ITEM_SIZE = 0.5f;
+
+	Entity& addBlock(Scene& scene, float x, float z, int textureId)
+	{
+		Entity& block = scene.addEntity();
+		block.hasTransform = true;
+		block.transform.position = glm::vec3(x, 0.0f, z);
+		block.transform.scale = glm::vec3(1.0f);
+		block.hasMeshRenderer = true;
+		block.meshRenderer.mesh = &scene.cubeMesh();
+		block.meshRenderer.textureId = textureId;
+		return block;
+	}
 }
 
-void MapBuildSystem::build(Scene& scene, const MapData& map)
+void MapBuildSystem::build(Scene& scene, const MapData& map, const std::map<char, ItemDef>& items,
+	const PlayerStats& stats)
 {
 	const std::vector<std::string>& rows = map.rows;
 	scene.grid().cellSize = CELL;
@@ -48,15 +63,41 @@ void MapBuildSystem::build(Scene& scene, const MapData& map)
 		for (std::size_t col = 0; col < cells.size(); ++col)
 		{
 			char cell = cells[col];
-			if (!isMapWallCell(cell))
-				continue;
-			Entity& wall = scene.addEntity();
-			wall.hasTransform = true;
-			wall.transform.position = glm::vec3(static_cast<float>(col) * CELL, 0.0f, static_cast<float>(row) * CELL);
-			wall.transform.scale = glm::vec3(1.0f);
-			wall.hasMeshRenderer = true;
-			wall.meshRenderer.mesh = &scene.cubeMesh();
-			wall.meshRenderer.textureId = mapWallTextureFor(map, cell);
+			float x = static_cast<float>(col) * CELL;
+			float z = static_cast<float>(row) * CELL;
+
+			if (isMapSolidCell(cell))
+				addBlock(scene, x, z, mapWallTextureFor(map, cell));
+			else if (isMapDoorCell(cell))
+			{
+				// Folha fina no meio da célula, atravessando o corredor.
+				Entity& door = addBlock(scene, x, z, mapWallTextureFor(map, cell));
+				door.hasDoor = true;
+				door.door.col = static_cast<int>(col);
+				door.door.row = static_cast<int>(row);
+				door.door.locked = cell == 'L';
+				door.door.alongX = mapDoorAxis(map, static_cast<int>(col), static_cast<int>(row)) != DoorAxisZ;
+				door.door.closedPosition = door.transform.position;
+				door.transform.scale = door.door.alongX
+					? glm::vec3(1.0f, 1.0f, DOOR_THICKNESS)
+					: glm::vec3(DOOR_THICKNESS, 1.0f, 1.0f);
+			}
+			else if (isMapItemCell(cell))
+			{
+				std::map<char, ItemDef>::const_iterator it = items.find(cell);
+				if (it == items.end())
+					continue;	// o validador já avisou
+				Entity& item = scene.addEntity();
+				item.hasTransform = true;
+				item.transform.position = glm::vec3(x, -0.5f + ITEM_SIZE * 0.5f, z);
+				item.transform.scale = glm::vec3(ITEM_SIZE);
+				item.hasMeshRenderer = true;
+				item.meshRenderer.mesh = &scene.quadMesh();
+				item.meshRenderer.textureId = it->second.textureId;
+				item.meshRenderer.billboard = true;
+				item.hasPickup = true;
+				item.pickup.item = it->second;
+			}
 		}
 	}
 
@@ -66,4 +107,6 @@ void MapBuildSystem::build(Scene& scene, const MapData& map)
 		static_cast<float>(map.spawnCol) * CELL, 0.0f, static_cast<float>(map.spawnRow) * CELL);
 	player.hasCamera = true;
 	player.hasCollider = true;
+	player.hasPlayerStats = true;
+	player.playerStats = stats;
 }

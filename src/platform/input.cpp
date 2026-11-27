@@ -24,7 +24,9 @@ Input::Input()
 	  mouseY(0),
 	  mouseDown(false),
 	  menuLeft(false),
-	  menuRight(false)
+	  menuRight(false),
+	  use(false),
+	  confirm(false)
 {}
 
 void Input::attachWindow(SDL_Window* window)
@@ -61,6 +63,8 @@ void Input::poll()
 	this->mouseDeltaY = 0.0f;
 	this->menuLeft = false;
 	this->menuRight = false;
+	this->use = false;
+	this->confirm = false;
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
@@ -79,6 +83,10 @@ void Input::poll()
 			SDL_Keycode key = event.key.keysym.sym;
 			if (isCtrlKey(key) && event.key.repeat == 0)
 				this->captureMouse(!this->mouseCaptured);
+			else if ((key == SDLK_e || key == SDLK_SPACE) && event.key.repeat == 0)
+				this->use = true;
+			else if ((key == SDLK_RETURN || key == SDLK_KP_ENTER) && event.key.repeat == 0)
+				this->confirm = true;
 			else if (key == SDLK_LEFT)
 				this->menuLeft = true;
 			else if (key == SDLK_RIGHT)

@@ -20,8 +20,11 @@ void Mesh::upload(const float* vertices, int count)
 {
 	this->vertexCount = count;
 
-	glGenVertexArrays(1, &this->vao);
-	glGenBuffers(1, &this->vbo);
+	// Reenviar (ex.: troca de mapa) reaproveita o VAO/VBO em vez de vazar os antigos.
+	if (!this->vao)
+		glGenVertexArrays(1, &this->vao);
+	if (!this->vbo)
+		glGenBuffers(1, &this->vbo);
 	glBindVertexArray(this->vao);
 	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 	glBufferData(GL_ARRAY_BUFFER, count * 5 * static_cast<int>(sizeof(float)), vertices, GL_STATIC_DRAW);
@@ -40,14 +43,18 @@ void Mesh::draw() const
 
 void Mesh::uploadUnitCube(Mesh& mesh)
 {
+	// Faces laterais com a textura de pé e sem espelhar quando vistas de fora
+	// (u cresce para a direita de quem olha, v = 1 em cima; a imagem é invertida no carregamento).
 	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		// -Z (vista de -Z: direita = -X)
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
+		// +Z (vista de +Z: direita = +X)
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
 		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
@@ -55,20 +62,23 @@ void Mesh::uploadUnitCube(Mesh& mesh)
 		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		// -X (vista de -X: direita = +Z)
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		// +X (vista de +X: direita = -Z)
 		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
+		// -Y (embaixo)
 		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
 		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
@@ -76,6 +86,7 @@ void Mesh::uploadUnitCube(Mesh& mesh)
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 
+		// +Y (em cima)
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
 		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
@@ -95,6 +106,19 @@ void Mesh::uploadPlane(Mesh& mesh, float tilesU, float tilesV)
 		 0.5f, 0.0f,  0.5f,  tilesU, tilesV,
 		-0.5f, 0.0f,  0.5f,  0.0f,   tilesV,
 		-0.5f, 0.0f, -0.5f,  0.0f,   0.0f
+	};
+	mesh.upload(vertices, 6);
+}
+
+void Mesh::uploadQuad(Mesh& mesh)
+{
+	float vertices[] = {
+		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+		-0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f
 	};
 	mesh.upload(vertices, 6);
 }

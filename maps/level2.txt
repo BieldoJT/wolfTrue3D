@@ -1,0 +1,16 @@
+// level2: pegue a chave atrás da porta para abrir a porta trancada da saída.
+// Sem 'next': o interruptor X encerra o jogo.
+wall 1
+floor 2
+ceiling 2
+door 4
+locked 5
+exit 6
+##############
+#P...#.......#
+#..A.D...K.H.#
+#....#.......#
+##L###########
+#....#########
+#.X..#########
+##############

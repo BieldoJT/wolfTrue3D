@@ -1,5 +1,6 @@
 #include "map/map_validator.hpp"
 
+#include <fstream>
 #include <sstream>
 #include <utility>
 
@@ -61,11 +62,12 @@ namespace
 		}
 	}
 
-	// Flood fill a partir do spawn: se uma célula andável encosta fora da grade, o mapa está aberto.
-	void checkClosed(const MapData& map, std::vector<MapMessage>& messages)
+	// Flood fill a partir do spawn (portas e itens deixam passar; paredes e 'X' não).
+	// Avisa se uma célula andável encosta fora da grade (mapa aberto) e diz se algum 'X' é alcançável.
+	bool checkClosed(const MapData& map, std::vector<MapMessage>& messages)
 	{
 		if (map.spawnCol < 0)
-			return;
+			return true;
 		std::vector<std::vector<bool> > seen(map.rows.size());
 		for (std::size_t row = 0; row < map.rows.size(); ++row)
 			seen[row].assign(map.rows[row].size(), false);
@@ -75,6 +77,8 @@ namespace
 		seen[static_cast<std::size_t>(map.spawnRow)][static_cast<std::size_t>(map.spawnCol)] = true;
 		const int dc[4] = {1, -1, 0, 0};
 		const int dr[4] = {0, 0, 1, -1};
+		bool warnedOpen = false;
+		bool exitReached = false;
 
 		while (!stack.empty())
 		{
@@ -87,19 +91,112 @@ namespace
 				int nr = row + dr[i];
 				if (!insideRow(map, nc, nr))
 				{
-					addMapWarning(messages, map.rowLines[static_cast<std::size_t>(row)],
-						"mapa aberto: dá para sair da grade pela " + cellName(col, row)
-						+ " (feche com parede)");
-					return;
+					if (!warnedOpen)
+						addMapWarning(messages, map.rowLines[static_cast<std::size_t>(row)],
+							"mapa aberto: dá para sair da grade pela " + cellName(col, row)
+							+ " (feche com parede)");
+					warnedOpen = true;
+					continue;
 				}
 				std::size_t r = static_cast<std::size_t>(nr);
 				std::size_t c = static_cast<std::size_t>(nc);
-				if (seen[r][c] || isMapWallCell(map.rows[r][c]))
+				char cell = map.rows[r][c];
+				if (isMapExitCell(cell))
+					exitReached = true;
+				if (seen[r][c] || isMapSolidCell(cell))
 					continue;
 				seen[r][c] = true;
 				stack.push_back(std::make_pair(nc, nr));
 			}
 		}
+		return exitReached;
+	}
+
+	// Primeira linha do arquivo onde a célula aparece (0 = não aparece).
+	int firstLineOf(const MapData& map, char symbol)
+	{
+		for (std::size_t row = 0; row < map.rows.size(); ++row)
+			if (map.rows[row].find(symbol) != std::string::npos)
+				return map.rowLines[row];
+		return 0;
+	}
+
+	void checkDoors(const MapData& map, std::vector<MapMessage>& messages)
+	{
+		for (std::size_t row = 0; row < map.rows.size(); ++row)
+		{
+			const std::string& cells = map.rows[row];
+			for (std::size_t col = 0; col < cells.size(); ++col)
+			{
+				if (isMapDoorCell(cells[col])
+					&& mapDoorAxis(map, static_cast<int>(col), static_cast<int>(row)) == DoorAxisNone)
+					addMapWarning(messages, map.rowLines[row], std::string("porta '") + cells[col]
+						+ "' sem paredes em dois lados opostos na "
+						+ cellName(static_cast<int>(col), static_cast<int>(row)));
+			}
+		}
+	}
+
+	// Diretiva de textura opcional ('door', 'locked', 'exit'): usada sem linha, ou linha sem uso.
+	void checkObjectDirective(const MapData& map, char symbol, int directiveLine, const std::string& name,
+		const std::string& fallback, std::vector<MapMessage>& messages)
+	{
+		int used = firstLineOf(map, symbol);
+		if (used > 0 && directiveLine == 0)
+			addMapWarning(messages, used, std::string("'") + symbol + "' sem linha '" + name + " <id>'; usando "
+				+ fallback);
+		if (used == 0 && directiveLine > 0)
+			addMapWarning(messages, directiveLine, "'" + name + "' definido mas '" + std::string(1, symbol)
+				+ "' não aparece na grade");
+	}
+
+	void checkExit(const MapData& map, bool exitReached, std::vector<MapMessage>& messages)
+	{
+		int exitLine = firstLineOf(map, 'X');
+		if (exitLine > 0 && !exitReached && map.spawnCol >= 0)
+			addMapWarning(messages, exitLine, "nenhum interruptor de saída 'X' é alcançável a partir do spawn");
+		if (map.nextLine > 0 && exitLine == 0)
+			addMapWarning(messages, map.nextLine, "'next' definido mas o mapa não tem saída 'X'");
+		if (map.nextLine > 0)
+		{
+			std::ifstream next(map.nextMapPath.c_str());
+			if (!next)
+				addMapWarning(messages, map.nextLine, "próximo mapa '" + map.nextMapPath + "' não encontrado");
+		}
+	}
+
+	void checkItems(const MapData& map, const MapCatalogs& catalogs, std::vector<MapMessage>& messages)
+	{
+		bool seen[26] = {false};
+		bool hasKey = false;
+		for (std::size_t row = 0; row < map.rows.size(); ++row)
+		{
+			const std::string& cells = map.rows[row];
+			for (std::size_t col = 0; col < cells.size(); ++col)
+			{
+				char cell = cells[col];
+				if (!isMapItemCell(cell) || seen[cell - 'A'])
+					continue;
+				seen[cell - 'A'] = true;
+				if (!catalogs.items)
+					continue;
+				std::map<char, ItemDef>::const_iterator it = catalogs.items->find(cell);
+				if (it == catalogs.items->end())
+				{
+					addMapWarning(messages, map.rowLines[row], std::string("item '") + cell
+						+ "' não existe no catálogo de itens; a célula fica vazia");
+					continue;
+				}
+				if (it->second.effect == ItemDef::Key)
+					hasKey = true;
+				if (catalogs.textureIds && catalogs.textureIds->find(it->second.textureId) == catalogs.textureIds->end())
+					addMapWarning(messages, map.rowLines[row], "textura " + toString(it->second.textureId)
+						+ " do item '" + it->second.name + "' não existe no catálogo de texturas");
+			}
+		}
+		int locked = firstLineOf(map, 'L');
+		if (catalogs.items && locked > 0 && !hasKey)
+			addMapWarning(messages, locked, "porta trancada 'L' sem nenhuma chave no mapa");
 	}
 
 	void checkSymbols(const MapData& map, std::vector<MapMessage>& messages)
@@ -159,18 +256,35 @@ namespace
 		}
 		checkTextureId(known, map.floorTexture, map.floorLine, "'floor'", messages);
 		checkTextureId(known, map.ceilingTexture, map.ceilingLine, "'ceiling'", messages);
+		if (map.doorLine > 0)
+			checkTextureId(known, map.doorTexture, map.doorLine, "'door'", messages);
+		if (map.lockedLine > 0)
+			checkTextureId(known, map.lockedTexture, map.lockedLine, "'locked'", messages);
+		if (map.exitLine > 0)
+			checkTextureId(known, map.exitTexture, map.exitLine, "'exit'", messages);
 	}
 }
 
-bool validateMap(const MapData& map, const std::set<int>* knownTextureIds, std::vector<MapMessage>& messages)
+MapCatalogs::MapCatalogs()
+	: textureIds(0), items(0)
+{}
+
+bool validateMap(const MapData& map, const MapCatalogs& catalogs, std::vector<MapMessage>& messages)
 {
 	std::size_t before = messages.size();
 	checkSpawns(map, messages);
 	checkRectangular(map, messages);
-	checkClosed(map, messages);
+	bool exitReached = checkClosed(map, messages);
 	checkSymbols(map, messages);
-	if (knownTextureIds)
-		checkTextures(map, *knownTextureIds, messages);
+	checkDoors(map, messages);
+	checkObjectDirective(map, 'D', map.doorLine, "door", "a textura de '#'", messages);
+	checkObjectDirective(map, 'L', map.lockedLine, "locked",
+		map.doorLine > 0 ? "a textura de 'door'" : "a textura de '#'", messages);
+	checkObjectDirective(map, 'X', map.exitLine, "exit", "a textura de '#'", messages);
+	checkExit(map, exitReached, messages);
+	checkItems(map, catalogs, messages);
+	if (catalogs.textureIds)
+		checkTextures(map, *catalogs.textureIds, messages);
 
 	for (std::size_t i = before; i < messages.size(); ++i)
 		if (messages[i].level == MapMessage::Error)

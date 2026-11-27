@@ -58,21 +58,43 @@ namespace
 				+ "); vale o último");
 	}
 
+	std::string trimmed(const std::string& text)
+	{
+		std::size_t start = text.find_first_not_of(" \t");
+		if (start == std::string::npos)
+			return "";
+		std::size_t end = text.find_last_not_of(" \t");
+		return text.substr(start, end - start + 1);
+	}
+
+	bool isTextureDirective(const std::string& name)
+	{
+		return name == "wall" || name == "floor" || name == "ceiling"
+			|| name == "door" || name == "locked" || name == "exit";
+	}
+
 	bool parseTextureDirective(const std::string& name, const std::string& args, int lineNo,
 		MapData& out, std::vector<MapMessage>& messages)
 	{
-		if (name == "floor" || name == "ceiling")
+		// Diretivas de um id só: floor, ceiling, door, locked, exit
+		int* texture = 0;
+		int* textureLine = 0;
+		if (name == "floor") { texture = &out.floorTexture; textureLine = &out.floorLine; }
+		else if (name == "ceiling") { texture = &out.ceilingTexture; textureLine = &out.ceilingLine; }
+		else if (name == "door") { texture = &out.doorTexture; textureLine = &out.doorLine; }
+		else if (name == "locked") { texture = &out.lockedTexture; textureLine = &out.lockedLine; }
+		else if (name == "exit") { texture = &out.exitTexture; textureLine = &out.exitLine; }
+		if (texture)
 		{
-			bool isFloor = name == "floor";
 			int textureId = 0;
 			if (!readTextureId(args, lineNo, textureId, messages))
 			{
 				addMapError(messages, lineNo, "use '" + name + " <id>' (id inteiro maior que zero)");
 				return false;
 			}
-			noteRepeated(messages, lineNo, isFloor ? out.floorLine : out.ceilingLine, name);
-			(isFloor ? out.floorTexture : out.ceilingTexture) = textureId;
-			(isFloor ? out.floorLine : out.ceilingLine) = lineNo;
+			noteRepeated(messages, lineNo, *textureLine, name);
+			*texture = textureId;
+			*textureLine = lineNo;
 			return true;
 		}
 
@@ -125,10 +147,27 @@ bool parseMap(std::istream& in, MapData& out, std::vector<MapMessage>& messages)
 		if (looksLikeDirective(line))
 		{
 			std::string name = directiveName(line);
-			if (name == "wall" || name == "floor" || name == "ceiling")
+			if (isTextureDirective(name))
 			{
 				if (!parseTextureDirective(name, line.substr(name.size()), lineNo, out, messages))
 					ok = false;
+			}
+			else if (name == "next")
+			{
+				// "next <arquivo>": próximo mapa, relativo à pasta deste mapa
+				std::string next = trimmed(line.substr(name.size()));
+				if (next.empty())
+				{
+					addMapError(messages, lineNo, "use 'next <arquivo do próximo mapa>'");
+					ok = false;
+				}
+				else
+				{
+					noteRepeated(messages, lineNo, out.nextLine, "next");
+					out.nextMap = next;
+					out.nextMapPath = next;
+					out.nextLine = lineNo;
+				}
 			}
 			else
 				addMapWarning(messages, lineNo, "linha desconhecida '" + name + "' ignorada");
@@ -172,5 +211,15 @@ bool loadMapFile(const std::string& path, MapData& out, std::vector<MapMessage>&
 		addMapError(messages, 0, "não foi possível abrir o arquivo");
 		return false;
 	}
-	return parseMap(file, out, messages);
+	bool ok = parseMap(file, out, messages);
+
+	// Caminho de "next" relativo à pasta do mapa atual (caminhos absolutos ficam como estão).
+	if (!out.nextMap.empty() && out.nextMap[0] != '/' && out.nextMap[0] != '\\'
+		&& !(out.nextMap.size() > 1 && out.nextMap[1] == ':'))
+	{
+		std::size_t slash = path.find_last_of("/\\");
+		if (slash != std::string::npos)
+			out.nextMapPath = path.substr(0, slash + 1) + out.nextMap;
+	}
+	return ok;
 }

@@ -4,3 +4,9 @@
 1 images/CRVascodaGama png.png
 2 images/chao_terra.jpg
 3 images/logo_cuiaba.png
+4 images/porta.png
+5 images/porta_trancada.png
+6 images/saida.png
+7 images/municao.png
+8 images/vida.png
+9 images/chave.png
