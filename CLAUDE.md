@@ -27,7 +27,7 @@ make test   # roda o mapcheck nos casos de tests/maps/ e nos mapas de maps/
 python3 scripts/gerar-assets.py  # recria os PNGs de portas, saída e itens em images/
 ```
 
-Controles: WASD anda, mouse olha, E/espaço usa (portas e interruptor de saída), Ctrl abre o menu de sensibilidade, Enter recomeça na tela de fim, Esc sai.
+Controles: WASD anda, mouse olha, E/espaço usa (portas e interruptor de saída), Ctrl abre o menu de opções (sensibilidade, resolução, modo de tela; salvo em `settings.txt`, fora do git), Enter recomeça na tela de fim, Esc sai.
 
 O `Makefile` lista os `.cpp` **explicitamente** em `SRC_FILES` (e os do formato de mapa em `MAP_FILES`): ao criar um arquivo novo, adicione-o lá.
 

@@ -6,7 +6,7 @@
 // Chame com GL_SCISSOR_TEST ligado.
 namespace PixelText
 {
-	// Fonte 5x7: A-Z, 0-9, espaço e + - : . ! %
+	// Fonte 5x7: A-Z, 0-9, espaço e + - : . ! % < >
 	void rect(int x, int y, int w, int h, float r, float g, float b, int winH);
 	void text(const char* str, int x, int y, int scale, float r, float g, float b, int winH);
 	int textWidth(const char* str, int scale);

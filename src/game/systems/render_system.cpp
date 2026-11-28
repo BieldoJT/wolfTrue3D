@@ -17,6 +17,8 @@ RenderSystem::RenderSystem()
 
 void RenderSystem::draw(Scene& scene, Window& window, Shader& shader, TextureCatalog& textures)
 {
+	// O tamanho da janela pode mudar (menu de opções, redimensionar): refaz o viewport todo quadro.
+	glViewport(0, 0, window.width(), window.height());
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
